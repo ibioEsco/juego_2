@@ -34,7 +34,7 @@ cd juego
 Crea un archivo `.env` en la raíz del proyecto con tus variables de entorno, por ejemplo:
 
 ```
-DB=mongodb: sqlite:///./
+DB= sqlite:///./
 SECRET_KEY=tu_clave_secreta
 ```
 
