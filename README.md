@@ -1,4 +1,4 @@
-# Xpert API
+# Juego API
 
 API REST para gestión de usuarios y para un juergo, desarrollada con **FastAPI**, **SQLite** y desplegada con **Docker**.
 
