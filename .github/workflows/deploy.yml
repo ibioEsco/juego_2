@@ -1,0 +1,67 @@
+name: CI/CD FastAPI to ECS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
+  SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+  TASK_DEFINITION: ${{ secrets.TASK_DEFINITION }}
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+  URL_BACK: ${{ secrets.URL_BACK }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  ALGORITHM: ${{ secrets.ALGORITHM }}
+  TOKEN_EXPIRATION_SECONDS: ${{ secrets.TOKEN_EXPIRATION_SECONDS }}
+  BD: ${{ secrets.BD }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image to ECR
+        run: |
+          IMAGE_URI=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Render task definition with environment variables
+        run: |
+          export IMAGE_URI=$IMAGE_URI
+          envsubst < task-definition-template.json > task-definition.json
+          cat task-definition.json
+
+      - name: Register new task definition
+        id: register-task
+        run: |
+          aws ecs register-task-definition \
+            --cli-input-json file://task-definition.json > task-def-out.json
+          TASK_REVISION=$(cat task-def-out.json | jq -r '.taskDefinition.revision')
+          echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --service ${{ env.SERVICE_NAME }} \
+            --task-definition ${{ env.TASK_DEFINITION }}:$TASK_REVISION

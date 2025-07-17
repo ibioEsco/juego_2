@@ -1,0 +1,28 @@
+{
+  "family": "miapp-fastapi",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "${CONTAINER_NAME}",
+      "image": "${IMAGE_URI}",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        { "name": "URL_BACK", "value": "${URL_BACK}" },
+        { "name": "SECRET_KEY", "value": "${SECRET_KEY}" },
+        { "name": "ALGORITHM", "value": "${ALGORITHM}" },
+        { "name": "TOKEN_EXPIRATION_SECONDS", "value": "${TOKEN_EXPIRATION_SECONDS}" },
+        { "name": "BD", "value": "${BD}" }
+      ]
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+}
