@@ -23,6 +23,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: git_juego
 
     steps:
       - name: Checkout code
@@ -47,21 +48,22 @@ jobs:
 
       - name: Render task definition with environment variables
         run: |
-          export IMAGE_URI=$IMAGE_URI
+          export IMAGE_URI=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
           envsubst < task-definition-template.json > task-definition.json
           cat task-definition.json
 
       - name: Register new task definition
         id: register-task
         run: |
-          aws ecs register-task-definition \
-            --cli-input-json file://task-definition.json > task-def-out.json
-          TASK_REVISION=$(cat task-def-out.json | jq -r '.taskDefinition.revision')
-          echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
+          TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://task-definition.json \
+            | jq -r '.taskDefinition.taskDefinitionArn')
+          echo "TASK_ARN=$TASK_ARN" >> $GITHUB_ENV
 
       - name: Update ECS Service
         run: |
           aws ecs update-service \
             --cluster ${{ env.CLUSTER_NAME }} \
             --service ${{ env.SERVICE_NAME }} \
-            --task-definition ${{ env.TASK_DEFINITION }}:$TASK_REVISION
+            --task-definition miapp-fastapi:$TASK_REVISION
+
