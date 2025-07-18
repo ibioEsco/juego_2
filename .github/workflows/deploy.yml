@@ -51,18 +51,20 @@ jobs:
           envsubst < task-definition-template.json > task-definition.json
           cat task-definition.json
 
-      - name: Register new task definition
-        id: register-task
+      - name: Register Task Definition
+        id: register_task
         run: |
-          TASK_ARN=$(aws ecs register-task-definition \
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file://task-definition.json \
-            | jq -r '.taskDefinition.taskDefinitionArn')
-          echo "TASK_ARN=$TASK_ARN" >> $GITHUB_ENV
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "task_definition_arn=$TASK_DEF_ARN" >> $GITHUB_OUTPUT
+
 
       - name: Update ECS Service
         run: |
           aws ecs update-service \
-            --cluster ${{ env.CLUSTER_NAME }} \
-            --service ${{ env.SERVICE_NAME }} \
-            --task-definition miapp-fastapi:7
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE }} \
+            --task-definition ${{ steps.register_task.outputs.task_definition_arn }}
 
