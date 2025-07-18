@@ -44,6 +44,11 @@ jobs:
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
+          
+      - name: Ensure CloudWatch Log Group exists
+        run: |
+          aws logs describe-log-groups --log-group-name-prefix "/ecs/miapp-fastapi" | grep "/ecs/miapp-fastapi" || \
+          aws logs create-log-group --log-group-name "/ecs/miapp-fastapi"
 
       - name: Render task definition with environment variables
         run: |
