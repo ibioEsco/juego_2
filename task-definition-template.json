@@ -22,14 +22,6 @@
       ]
     }
   ],
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "3072",
-  "executionRoleArn": "arn:aws:iam::219765858138:role/ecsTaskExecutionRole",
-  "runtimePlatform": {
-    "cpuArchitecture": "X86_64",
-    "operatingSystemFamily": "LINUX"
-  },
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
@@ -37,6 +29,15 @@
       "awslogs-region": "us-east-1", 
       "awslogs-stream-prefix": "ecs"
     }
+  },
+
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "3072",
+  "executionRoleArn": "arn:aws:iam::219765858138:role/ecsTaskExecutionRole",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
   }
 
 
