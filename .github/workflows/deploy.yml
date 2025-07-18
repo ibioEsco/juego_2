@@ -64,5 +64,5 @@ jobs:
           aws ecs update-service \
             --cluster ${{ env.CLUSTER_NAME }} \
             --service ${{ env.SERVICE_NAME }} \
-            --task-definition miapp-fastapi-service-zcba0z8n:6 \
+            --task-definition $TASK_ARN
 
