@@ -13,7 +13,6 @@ env:
   TASK_DEFINITION: ${{ secrets.TASK_DEFINITION }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-
   URL_BACK: ${{ secrets.URL_BACK }}
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
   ALGORITHM: ${{ secrets.ALGORITHM }}
